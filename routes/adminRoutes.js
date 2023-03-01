@@ -1,9 +1,9 @@
 const express = require('express');
-// const userController = require('../controllers/userController');
 const adminController = require('../controllers/adminController');
 const authController = require('../controllers/authController');
 const router = express.Router();
 
+// Restrict access to an 'admin' who is currently logged in.
 router.use(authController.protect, authController.restrictTo('admin'));
 
 router

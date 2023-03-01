@@ -1,6 +1,6 @@
-const User = require('../models/userModel');
 const factory = require('./handlerFactory');
 
+// Reusing code from the handlerFactory file
 exports.createUser = factory.createDocument('user');
 
 exports.getUser = factory.getDocument();

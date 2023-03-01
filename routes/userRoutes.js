@@ -6,14 +6,15 @@ const router = express.Router();
 ////////////////////////////////////////////////////////////
 // These routes can be accessed by 'admin' as well as 'user'
 
+// This is non-protected route, so that anyone with credentials can login
 router.post('/login', authController.login);
 
 router
   .route('/')
   .get(authController.protect, userController.getAllUsers)
+  // Creating or signing up user is not protected
   .post(userController.createUser);
 
-// Provide the id of the user as a parameter
 router
   .route('/:id')
   .get(authController.protect, userController.getUser)

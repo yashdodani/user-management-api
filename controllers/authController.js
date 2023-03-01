@@ -2,10 +2,12 @@ const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 const User = require('../models/userModel');
 
+// Function to sign token for a giver userId
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET);
 };
 
+// Function for logging in user or admin
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -58,6 +60,7 @@ exports.protect = async (req, res, next) => {
   next();
 };
 
+// Function to restrict only certain users to access protected routes.
 exports.restrictTo = (role) => {
   return (req, res, next) => {
     console.log(role);

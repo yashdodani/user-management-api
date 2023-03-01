@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
+const UpdatedFields = require('../models/updatedFieldsModel');
 
 exports.createDocument = (role) => {
   return async (req, res) => {
@@ -87,12 +88,31 @@ exports.updateDocument = () => {
       });
     }
 
+    // Get the user before updating (passed in the 'protect' route);
+    const userPrev = req.user;
+
     // Updating the 'updatedAt' field when user updates document
     req.body.updatedAt = Date.now();
 
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
+    });
+
+    // Save the changes into the updatedFields Collection
+    const fieldsUpdated = Object.keys(req.body);
+
+    // Remove 'updateAt' property
+    fieldsUpdated.pop();
+
+    // For each updated field, create a record in the collection.
+    fieldsUpdated.forEach(async (field) => {
+      await UpdatedFields.create({
+        userId: user._id,
+        fieldName: field,
+        fieldOldValue: userPrev[field],
+        fieldNewValue: user[field],
+      });
     });
 
     res.status(200).json({

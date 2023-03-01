@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 const userSchema = mongoose.Schema({
   firstName: {
@@ -18,6 +19,8 @@ const userSchema = mongoose.Schema({
     required: [true, 'A user should have an email'],
     unique: true,
     lowercase: true,
+
+    // validating if email is in correct form
     validate: [validator.isEmail, 'Please provide valid email'],
   },
   password: {
@@ -25,12 +28,13 @@ const userSchema = mongoose.Schema({
     required: [true, 'Please provide a password'],
     minLength: 6,
     maxLength: 12,
-    // select: false,
+    select: false,
   },
   passwordConfirm: {
     type: String,
     required: [true, 'Please confirm your password'],
-    // select: false
+
+    // validate if password and passwordConfirm are same.
     validate: {
       validator: function (el) {
         return el === this.password;
@@ -53,6 +57,20 @@ const userSchema = mongoose.Schema({
   updatedAt: {
     type: Date,
   },
+});
+
+// Using a pre 'save' middleware to encrypt password before saving
+userSchema.pre('save', async function (next) {
+  // Only run this function if password was modified
+  if (!this.isModified('password')) return next();
+
+  // Encrypt the password
+  this.password = await bcrypt.hash(this.password, 12);
+
+  // Delete the passwordConfirm field
+  this.passwordConfirm = undefined;
+
+  next();
 });
 
 // Making Model from Schema
